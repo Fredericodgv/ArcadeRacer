@@ -60,3 +60,13 @@ private void Awake()
 - `Assets/Scripts/UI/` — HUD, TrickMeterView, TimerView, MainMenuView, SettingsView, PauseView, LeaderboardView.
 - `Assets/Scripts/Data/` — ScriptableObjects (CarData, TrackData, SettingsData).
 
+---
+
+## 5. Diretriz de Desenvolvimento com o Usuário
+- **Configuração no Editor:** Sempre priorizar expor campos (`[SerializeField]`) e permitir que o usuário configure componentes, físicas, colisores, materiais e layers diretamente pelo Inspector da Unity.
+- **Evitar Hardcode:** Não sobrescrever via código configurações padrão da Unity (ex: `rb.mass`, `rb.drag`, etc.) a menos que estritamente necessário.
+- **Documentação Obrigatória com `/// <summary>`:** Todos os métodos de física, cálculos vetoriais e regras de gameplay devem conter docstrings XML `/// <summary>` claras e detalhadas explicando a física/lógica aplicada, mantendo-os rigorosamente atualizados a cada refatoração.
+- **Comunicação:** O usuário já possui conhecimento de Unity. Fornecer instruções breves, diretas e objetivas sobre quais configurações ou componentes ajustar no Editor.
+
+
+
