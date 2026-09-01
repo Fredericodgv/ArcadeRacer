@@ -96,10 +96,8 @@ ArcadeRacer/
 
 ---
 
-## 🎮 Controles Padrão (Teclado / Controle)
 ## 🎮 Esquema de Controles
 
-| Ação | Teclado | Gamepad |
 ### 🕹️ Mapeamento do Gamepad
 
 ```text
@@ -133,13 +131,6 @@ ArcadeRacer/
 
 | Ação | Gamepad (Xbox / PlayStation) | Teclado & Mouse |
 | :--- | :--- | :--- |
-| **Acelerar** | `W` | Gatilho Direito (`R2` / `RT`) |
-| **Frear / Ré** | `S`| Gatilho Esquerdo (`L2` / `LT`) |
-| **Direção** | `A` / `D` | Analógico Esquerdo |
-| **Drift / Derrapagem** | `Shift` | Botão `R1` |
-| **Manobras Aéreas (Flips / Spins)** | `Q` / `E` / `WASD` no ar | Analógico Direito / Botões de Ação |
-| **Ativar Mega Boost** | `Shift` / `F` | `LB` / `L1` ou Botão `Y` |
-| **Pausar** | `Esc` | `Start` / `Options` |
 | **Acelerar** | Gatilho Direito (`RT` / `R2`) | `W` / `Seta Cima` |
 | **Frear / Marcha Ré** | Gatilho Esquerdo (`LT` / `L2`) | `S` / `Seta Baixo` |
 | **Esterçar (Direção)** | Analógico Esquerdo (`LS`) / D-Pad | `A` / `D` ou `Setas Laterais` |
