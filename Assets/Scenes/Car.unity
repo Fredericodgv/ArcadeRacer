@@ -270,11 +270,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArcadeCameraController
   target: {fileID: 610237430}
+  carController: {fileID: 0}
   distance: 6
   height: 2.2
   lookAtHeight: 0.8
   rotationDamping: 8
   heightDamping: 5
+  baseFov: 60
+  maxSpeedFov: 75
+  megaBoostFov: 88
+  fovDamping: 4
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -599,7 +604,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1368964755}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 93748de96d086c44580c24bb6139f73d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

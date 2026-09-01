@@ -9,9 +9,9 @@ using UnityEngine.InputSystem;
 public class CarController : MonoBehaviour
 {
     [Header("Componentes")]
-    [Tooltip("Arraste o Rigidbody do carro aqui (ou deixe vazio para pegar automaticamente)")]
+    [Tooltip("Rigidbody do carro (preenchido automaticamente se vazio)")]
     [SerializeField] private Rigidbody rb;
-    [Tooltip("Objeto visual filho para inclinar nas curvas (ex: o cubo ou modelo 3D)")]
+    [Tooltip("Objeto visual filho para inclinar nas curvas (ex: o modelo 3D)")]
     [SerializeField] private Transform carBodyModel;
 
     [Header("Motor & Velocidade")]
@@ -52,14 +52,14 @@ public class CarController : MonoBehaviour
     [SerializeField] private float bodyRollAngle = 6f;
     [SerializeField] private float bodyRollSpeed = 10f;
 
-    // Estado Interno
+    // Estado interno
     private bool isGrounded;
     private RaycastHit groundHit;
     private float currentSpeed;
     private bool isBoosting;
     private float boostTimer;
 
-    // Cache de Ações do Unity 6
+    // Cache de ações do Input System (Unity 6 Project-Wide Actions)
     private InputAction accelerateAction;
     private InputAction brakeAction;
     private InputAction steerAction;
@@ -68,25 +68,33 @@ public class CarController : MonoBehaviour
     private InputAction airControlAction;
     private InputAction megaBoostAction;
 
-    // Getters Públicos para HUD / Efeitos
+    // Getters públicos para HUD / VFX externos
     public float CurrentSpeed => currentSpeed;
     public float CurrentSpeedKmh => currentSpeed * 3.6f;
     public float SpeedNormalized => Mathf.Clamp01(Mathf.Abs(currentSpeed) / (maxSpeed * (isBoosting ? boostMultiplier : 1f)));
     public bool IsGrounded => isGrounded;
-    public bool IsDrifting => isGrounded && driftAction != null && driftAction.IsPressed() && Mathf.Abs(steerAction != null ? steerAction.ReadValue<float>() : 0f) > 0.1f && currentSpeed > 4f;
     public bool IsBoosting => isBoosting;
+    public bool IsDrifting => isGrounded
+                                     && driftAction != null && driftAction.IsPressed()
+                                     && steerAction != null && Mathf.Abs(steerAction.ReadValue<float>()) > 0.1f
+                                     && currentSpeed > 4f;
+
+    #region Inicialização
 
     private void Awake()
     {
         if (rb == null) rb = GetComponent<Rigidbody>();
+
+        // Garante que carBodyModel seja sempre um filho, nunca a raiz física
+        if (carBodyModel == transform) carBodyModel = null;
         if (carBodyModel == null && transform.childCount > 0) carBodyModel = transform.GetChild(0);
 
         CacheInputActions();
     }
 
     /// <summary>
-    /// Localiza e armazena em cache as referências das ações do mapa 'Player'
-    /// registradas globalmente no Project-Wide Input do Unity 6.
+    /// Localiza e armazena em cache as ações do mapa 'Player' registradas globalmente
+    /// no Project-Wide Input do Unity 6, evitando o uso de componente PlayerInput.
     /// </summary>
     private void CacheInputActions()
     {
@@ -102,12 +110,14 @@ public class CarController : MonoBehaviour
         megaBoostAction = actions.FindAction("Player/MegaBoost");
     }
 
+    #endregion
+
+    #region Loop Principal
+
     private void Update()
     {
         if (megaBoostAction != null && megaBoostAction.WasPressedThisFrame())
-        {
             TriggerMegaBoost();
-        }
 
         UpdateBoost();
         UpdateBodyVisuals();
@@ -121,152 +131,148 @@ public class CarController : MonoBehaviour
         HandleAirControl();
     }
 
+    #endregion
+
+    #region Física
+
     /// <summary>
-    /// Executa um Raycast para baixo a partir do centro do veículo para detectar
-    /// se o carro está em contato com o solo e identificar a normal da superfície.
+    /// Raycast curto para baixo a partir do centro do chassi para detectar contato com o solo
+    /// e capturar a normal da superfície para alinhamento de terreno.
     /// </summary>
     private void CheckGrounded()
     {
-        Vector3 origin = transform.position + Vector3.up * 0.5f;
+        Vector3 origin = transform.position + transform.up * 0.5f;
         isGrounded = Physics.Raycast(origin, -transform.up, out groundHit, groundCheckDistance + 0.5f, groundLayer, QueryTriggerInteraction.Ignore);
     }
 
     /// <summary>
-    /// Processa a movimentação longitudinal do veículo (aceleração para frente e marcha ré/frenagem).
-    /// Unifica a aplicação de força com atenuação progressiva contínua próxima aos limites de velocidade
-    /// tanto para frente (maxSpeed) quanto para ré (maxReverseSpeed), eliminando qualquer tremor (flickering).
-    /// As entradas de aceleração e freio/ré se anulam automaticamente quando pressionadas simultaneamente (netInput = accel - brake),
-    /// além de aplicar frenagem ativa quando o sentido do input for oposto ao vetor de deslocamento atual.
+    /// Aplica força longitudinal (frente/ré) com atenuação progressiva próxima aos limites de velocidade,
+    /// eliminando flickering. Inputs de acelerar e freio se anulam quando pressionados juntos (netInput = accel - brake).
+    /// Aplica também downforce dinâmico proporcional à velocidade para estabilidade no solo.
     /// </summary>
     private void HandleLongitudinalMovement()
     {
         currentSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
         if (!isGrounded) return;
 
-        float accelInput = accelerateAction != null ? accelerateAction.ReadValue<float>() : 0f;
-        float brakeInput = brakeAction != null ? brakeAction.ReadValue<float>() : 0f;
-
-        // Anulação automática: calcula o input líquido (se ambos forem pressionados juntos, netInput = 0)
-        float netInput = accelInput - brakeInput;
+        float accelInput = accelerateAction?.ReadValue<float>() ?? 0f;
+        float brakeInput = brakeAction?.ReadValue<float>() ?? 0f;
+        float netInput = accelInput - brakeInput; // anulação automática ao pressionar os dois juntos
         float effectiveMaxSpeed = maxSpeed * (isBoosting ? boostMultiplier : 1f);
 
-        // 1. Movimento Frontal (netInput positivo)
         if (netInput > 0.01f)
         {
             if (currentSpeed >= -0.5f)
             {
-                // Aceleração para frente com atenuação suave perto da velocidade máxima
-                float speedRatio = Mathf.Max(0f, currentSpeed) / effectiveMaxSpeed;
-                float powerFactor = Mathf.Clamp01(1f - speedRatio);
-
-                if (powerFactor > 0.001f)
-                {
-                    rb.AddForce(transform.forward * (netInput * motorForce * powerFactor), ForceMode.Acceleration);
-                }
+                // Frente: atenuação suave perto da velocidade máxima (sem cortes bruscos)
+                float powerFactor = Mathf.Clamp01(1f - Mathf.Max(0f, currentSpeed) / effectiveMaxSpeed);
+                rb.AddForce(transform.forward * (netInput * motorForce * powerFactor), ForceMode.Acceleration);
             }
             else
             {
-                // Estava em ré: freio ativo contra o movimento para trás até parar
+                // Estava em ré: freio ativo
                 rb.AddForce(transform.forward * (netInput * brakeForce), ForceMode.Acceleration);
             }
         }
-        // 2. Movimento Traseiro / Frenagem (netInput negativo)
         else if (netInput < -0.01f)
         {
-            float reverseStrength = -netInput; // Intensidade positiva do comando de ré/freio
-
+            float strength = -netInput;
             if (currentSpeed > 0.5f)
             {
-                // Em movimento para frente: freio ativo contra o movimento
-                rb.AddForce(-transform.forward * (reverseStrength * brakeForce), ForceMode.Acceleration);
+                // Em movimento para frente: freio ativo
+                rb.AddForce(-transform.forward * (strength * brakeForce), ForceMode.Acceleration);
             }
             else
             {
-                // Parado ou em ré: aceleração para trás com atenuação suave perto de maxReverseSpeed (zero flickering)
-                float reverseSpeedRatio = Mathf.Abs(Mathf.Min(0f, currentSpeed)) / maxReverseSpeed;
-                float reversePowerFactor = Mathf.Clamp01(1f - reverseSpeedRatio);
-
-                if (reversePowerFactor > 0.001f)
-                {
-                    rb.AddForce(-transform.forward * (reverseStrength * (motorForce * 0.6f) * reversePowerFactor), ForceMode.Acceleration);
-                }
+                // Ré: atenuação suave perto de maxReverseSpeed (sem flickering)
+                float powerFactor = Mathf.Clamp01(1f - Mathf.Abs(Mathf.Min(0f, currentSpeed)) / maxReverseSpeed);
+                rb.AddForce(-transform.forward * (strength * motorForce * 0.6f * powerFactor), ForceMode.Acceleration);
             }
         }
 
-        // 3. Downforce dinâmico proporcional à velocidade para manter o carro estável
-        if (Mathf.Abs(currentSpeed) > 2f)
+        // Downforce proporcional à velocidade para manter o carro aderido ao solo
+        float speedAbs = Mathf.Abs(currentSpeed);
+        if (speedAbs > 2f)
         {
             Vector3 normal = groundHit.normal.sqrMagnitude > 0.1f ? groundHit.normal : Vector3.up;
-            rb.AddForce(-normal * (downforce * Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed)), ForceMode.Acceleration);
+            rb.AddForce(-normal * (downforce * Mathf.Clamp01(speedAbs / maxSpeed)), ForceMode.Acceleration);
         }
     }
 
     /// <summary>
-    /// Controla o esterço proporcional à velocidade do veículo (bloqueado quando parado),
-    /// aplica alinhamento suave com a inclinação do terreno em uma única rotação combinada
-    /// e amortece o vetor de velocidade lateral (fricção/grip vs drift) integrado ao Time.fixedDeltaTime.
+    /// Esterço proporcional à velocidade (bloqueado quando parado), alinhamento suave com a normal
+    /// do terreno e amortecimento lateral (grip vs drift) integrado ao Time.fixedDeltaTime.
+    /// Toda a rotação é aplicada em uma única chamada MoveRotation para evitar micro-jitter.
     /// </summary>
     private void HandleSteeringAndGrip()
     {
         if (!isGrounded) return;
 
         float absSpeed = Mathf.Abs(currentSpeed);
-        float steer = steerAction != null ? steerAction.ReadValue<float>() : 0f;
+        float steer = steerAction?.ReadValue<float>() ?? 0f;
         bool isDrifting = driftAction != null && driftAction.IsPressed();
 
-        // Parado: cancela esterço e qualquer deslizamento lateral residual
+        // Parado: apenas cancela deslizamento lateral residual
         if (absSpeed < 0.15f)
         {
-            Vector3 stoppedSideVelocity = Vector3.Dot(rb.linearVelocity, transform.right) * transform.right;
-            rb.linearVelocity -= stoppedSideVelocity * Mathf.Clamp01(20f * Time.fixedDeltaTime);
+            Vector3 sideVel = Vector3.Dot(rb.linearVelocity, transform.right) * transform.right;
+            rb.linearVelocity -= sideVel * Mathf.Clamp01(20f * Time.fixedDeltaTime);
             return;
         }
 
-        float turnFactor = Mathf.Clamp01(absSpeed / minTurnSpeed) * steerSpeedCurve.Evaluate(Mathf.Clamp01(absSpeed / maxSpeed));
+        float curveFactor = steerSpeedCurve.Evaluate(Mathf.Clamp01(absSpeed / maxSpeed));
+        float turnFactor = Mathf.Clamp01(absSpeed / minTurnSpeed) * curveFactor;
         if (isDrifting && Mathf.Abs(steer) > 0.05f) turnFactor *= driftSteerMultiplier;
 
         float dirSign = currentSpeed >= 0f ? 1f : -1f;
         float steerAmount = steer * steerSpeed * turnFactor * dirSign * Time.fixedDeltaTime;
 
-        Quaternion turnRotation = Quaternion.Euler(0f, steerAmount, 0f);
-        Quaternion targetRot = rb.rotation * turnRotation;
-
+        Quaternion turnRot = rb.rotation * Quaternion.Euler(0f, steerAmount, 0f);
         Vector3 normal = groundHit.normal.sqrMagnitude > 0.1f ? groundHit.normal : Vector3.up;
-        Quaternion targetGround = Quaternion.FromToRotation(transform.up, normal) * targetRot;
-        rb.MoveRotation(Quaternion.Slerp(targetRot, targetGround, groundAlignSpeed * Time.fixedDeltaTime));
+        Quaternion groundRot = Quaternion.FromToRotation(transform.up, normal) * turnRot;
+        rb.MoveRotation(Quaternion.Slerp(turnRot, groundRot, groundAlignSpeed * Time.fixedDeltaTime));
 
-        // Amortecimento lateral estável integrado ao tempo para evitar oscilações
         float gripRate = isDrifting ? (driftGrip * 25f) : (lateralGrip * 45f);
         Vector3 sideVelocity = Vector3.Dot(rb.linearVelocity, transform.right) * transform.right;
         rb.linearVelocity -= sideVelocity * Mathf.Clamp01(gripRate * Time.fixedDeltaTime);
     }
 
     /// <summary>
-    /// Gerencia o comportamento do carro no ar: quando 'AirTrick' está ativo, permite rotações acrobáticas
-    /// de Pitch (flips) e Roll (giros em barril); quando desativado, auto-estabiliza o veículo alinhando-o com o mundo.
+    /// Quando 'AirTrick' (A/Espaço) está pressionado no ar, aplica Pitch (frente/trás) e Roll (giros laterais)
+    /// no espaço local do carro via pós-multiplicação de Quaternion, permitindo mortais e giros de 360° contínuos.
+    /// Sem o botão, auto-estabiliza suavemente o carro em posição ereta.
     /// </summary>
     private void HandleAirControl()
     {
         if (isGrounded) return;
 
         bool airTrick = airTrickAction != null && airTrickAction.IsPressed();
-        Vector2 airInput = airControlAction != null ? airControlAction.ReadValue<Vector2>() : Vector2.zero;
+        Vector2 airInput = airControlAction?.ReadValue<Vector2>() ?? Vector2.zero;
 
         if (airTrick && airInput.sqrMagnitude > 0.05f)
         {
-            Quaternion airRot = Quaternion.Euler(airInput.y * airPitchSpeed * Time.fixedDeltaTime, 0f, -airInput.x * airRollSpeed * Time.fixedDeltaTime);
-            rb.MoveRotation(rb.rotation * airRot);
+            float pitchAngle = airInput.y * airPitchSpeed * Time.fixedDeltaTime;
+            float rollAngle = -airInput.x * airRollSpeed * Time.fixedDeltaTime;
+
+            // Pós-multiplicação: aplica no espaço LOCAL do veículo (imune a Gimbal Lock do Inspector)
+            Quaternion deltaRot = Quaternion.AngleAxis(pitchAngle, Vector3.right)
+                                * Quaternion.AngleAxis(rollAngle, Vector3.forward);
+            rb.MoveRotation(rb.rotation * deltaRot);
+            rb.angularVelocity = Vector3.zero;
         }
         else
         {
-            Quaternion targetUp = Quaternion.FromToRotation(transform.up, Vector3.up) * rb.rotation;
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetUp, airStabilizeSpeed * Time.fixedDeltaTime));
+            Quaternion upright = Quaternion.FromToRotation(transform.up, Vector3.up) * rb.rotation;
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, upright, airStabilizeSpeed * Time.fixedDeltaTime));
         }
     }
 
+    #endregion
+
+    #region Boost & Visuals
+
     /// <summary>
-    /// Ativa o Mega Boost, aplicando um impulso instantâneo na direção frontal
-    /// e habilitando o multiplicador temporário de velocidade máxima.
+    /// Ativa o Mega Boost: impulso instantâneo para frente + multiplicador de velocidade máxima por boostDuration segundos.
     /// </summary>
     public void TriggerMegaBoost()
     {
@@ -277,7 +283,7 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Atualiza o temporizador do Mega Boost e encerra o estado ao expirar a duração.
+    /// Atualiza o temporizador do Mega Boost, encerrando o estado ao expirar.
     /// </summary>
     private void UpdateBoost()
     {
@@ -287,14 +293,18 @@ public class CarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Aplica uma inclinação sutil (body roll) no modelo visual filho durante curvas fechadas
-    /// para feedback estético sem comprometer a raiz física do Rigidbody.
+    /// Aplica body roll cosmético no modelo visual filho durante curvas, sem afetar a raiz física.
     /// </summary>
     private void UpdateBodyVisuals()
     {
-        if (carBodyModel == null) return;
-        float steer = steerAction != null ? steerAction.ReadValue<float>() : 0f;
+        if (carBodyModel == null || carBodyModel == transform) return;
+        float steer = steerAction?.ReadValue<float>() ?? 0f;
         float targetRoll = isGrounded ? (-steer * bodyRollAngle) : 0f;
-        carBodyModel.localRotation = Quaternion.Slerp(carBodyModel.localRotation, Quaternion.Euler(0f, 0f, targetRoll), bodyRollSpeed * Time.deltaTime);
+        carBodyModel.localRotation = Quaternion.Slerp(
+            carBodyModel.localRotation,
+            Quaternion.Euler(0f, 0f, targetRoll),
+            bodyRollSpeed * Time.deltaTime);
     }
+
+    #endregion
 }
