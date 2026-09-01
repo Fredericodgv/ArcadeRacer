@@ -131,11 +131,11 @@ ArcadeRacer/
 
 | Ação | Gamepad (Xbox / PlayStation) | Teclado & Mouse |
 | :--- | :--- | :--- |
-| **Acelerar** | Gatilho Direito (`RT` / `R2`) | `W` / `Seta Cima` |
-| **Frear / Marcha Ré** | Gatilho Esquerdo (`LT` / `L2`) | `S` / `Seta Baixo` |
-| **Esterçar (Direção)** | Analógico Esquerdo (`LS`) / D-Pad | `A` / `D` ou `Setas Laterais` |
+| **Acelerar** | Gatilho Direito (`RT` / `R2`) | `W` |
+| **Frear / Marcha Ré** | Gatilho Esquerdo (`LT` / `L2`) | `S`  |
+| **Direção** | Analógico Esquerdo (`LS`) / D-Pad | `A` / `D` |
 | **Drift / Derrapagem** | Botão de Ombro (`RB` / `R1`) ou Botão `A` / `✕` | `Espaço` / `Shift Esquerdo` |
-| **Manobras Aéreas (Flips / Spins)** | Analógico Direito (`RS`) ou Botão `X` / `◻` | `Q` / `E` / Teclas de Movimento no Ar |
+| **Manobras Aéreas (Flips / Spins)** | Botão `A` / `x` + Analógico Esquerdo (`LS`) | `Espaço` + WASD |
 | **Ativar Mega Boost (Barra Roxa)** | Botão de Ombro (`LB` / `L1`) ou Botão `Y` / `△` | `F` / `Shift Direito` |
 | **Freio de Mão Rápido** | Botão `B` / `◯` | `Ctrl Esquerdo` |
 | **Pausar / Menu** | Botão `Menu` (`Start` / `Options`) | `Esc` |
