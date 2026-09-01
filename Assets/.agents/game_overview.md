@@ -54,3 +54,15 @@
   - Peças customizáveis (spoilers, rodas, escapamentos).
   - Decalques, skins e paletas de cores.
 
+---
+
+## 4. Mapeamento de Controles (Input System)
+- **Acelerar (`Accelerate`):** `RT` / `R2` (Gamepad) | `W` (Teclado)
+- **Frear / Ré (`Brake`):** `LT` / `L2` (Gamepad) | `S` (Teclado)
+- **Direção (`Steer`):** `LS` / `D-Pad` (Gamepad) | `A` / `D` (Teclado)
+- **Drift (`Drift`):** `RB` / `R1` (Gamepad) | `Ctrl Esquerdo` (Teclado)
+- **Manobras Aéreas (`AirTrick` + `AirControl`):** `Botão A / ✕` + `LS` (Gamepad) | `Espaço` + `WASD` (Teclado)
+- **Mega Boost (`MegaBoost`):** `LB` / `L1` ou `Y / △` (Gamepad) | `Shift Esquerdo` (Teclado)
+- **Pausar (`Pause`):** `Menu / Start` (Gamepad) | `Esc` (Teclado)
+
+
