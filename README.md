@@ -96,17 +96,49 @@ ArcadeRacer/
 
 ---
 
-## 🎮 Controles Padrão (Teclado / Controle)
+## 🎮 Esquema de Controles
 
-| Ação | Teclado | Gamepad |
+### 🕹️ Mapeamento do Gamepad
+
+```text
+                     ┌──────────────────┐               ┌──────────────────┐
+                     │    [ L2 / LT ]   │               │    [ R2 / RT ]   │
+                     │    Frear / Ré    │               │     Acelerar     │
+                     └────────┬─────────┘               └────────┬─────────┘
+                              │                                  │
+    ┌──────────────────┐      │                                  │      ┌──────────────────┐
+    │    [ L1 / LB ]   │◄─────┤                                  ├─────►│    [ R1 / RB ]   │
+    │    Mega Boost    │      │                                  │      │ Drift / Derrapagem
+    └──────────────────┘      │     .----------------------.     │      └──────────────────┘
+                              └───►/   [View]      [Menu]   \◄───┘
+                                  /       \          /       \
+     ┌──────────────────┐        |  (▲)    `--------'    (Y)  |        ┌──────────────────┐
+     │ Analógico Esq.   ├───────►| (◄)(►)                (X)(B)|◄───────┤ Botões de Ação   │
+     │ Direção / Curva  │        |  (▼)    (L)    (R)    (A)  |        │ (Y) Mega Boost   │
+     └──────────────────┘         \         \      /         /         │ (X) Giro Aéreo   │
+                                   \         `----'         /          │ (B) Freio de Mão │
+                                    `----------------------'           │ (A) Drift / Pulo │
+                                              ▲                        └──────────────────┘
+                                              │
+                                    ┌─────────┴────────┐
+                                    │  Analógico Dir.  │
+                                    │ Manobras Aéreas  │
+                                    │ (Flips & Rolls)  │
+                                    └──────────────────┘
+```
+
+### ⌨️ Tabela Completa de Controles
+
+| Ação | Gamepad (Xbox / PlayStation) | Teclado & Mouse |
 | :--- | :--- | :--- |
-| **Acelerar** | `W` / `Seta Cima` | Gatilho Direito (`RT` / `R2`) |
-| **Frear / Ré** | `S` / `Seta Baixo` | Gatilho Esquerdo (`LT` / `L2`) |
-| **Direção** | `A` / `D` ou `Setas` | Analógico Esquerdo |
-| **Drift / Derrapagem** | `Espaço` / `Shift` | Botão `X` / `A` / `R1` |
-| **Manobras Aéreas (Flips / Spins)** | `Q` / `E` / `WASD` no ar | Analógico Direito / Botões de Ação |
-| **Ativar Mega Boost** | `Shift` / `F` | `LB` / `L1` ou Botão `Y` |
-| **Pausar** | `Esc` | `Start` / `Options` |
+| **Acelerar** | Gatilho Direito (`RT` / `R2`) | `W` / `Seta Cima` |
+| **Frear / Marcha Ré** | Gatilho Esquerdo (`LT` / `L2`) | `S` / `Seta Baixo` |
+| **Esterçar (Direção)** | Analógico Esquerdo (`LS`) / D-Pad | `A` / `D` ou `Setas Laterais` |
+| **Drift / Derrapagem** | Botão de Ombro (`RB` / `R1`) ou Botão `A` / `✕` | `Espaço` / `Shift Esquerdo` |
+| **Manobras Aéreas (Flips / Spins)** | Analógico Direito (`RS`) ou Botão `X` / `◻` | `Q` / `E` / Teclas de Movimento no Ar |
+| **Ativar Mega Boost (Barra Roxa)** | Botão de Ombro (`LB` / `L1`) ou Botão `Y` / `△` | `F` / `Shift Direito` |
+| **Freio de Mão Rápido** | Botão `B` / `◯` | `Ctrl Esquerdo` |
+| **Pausar / Menu** | Botão `Menu` (`Start` / `Options`) | `Esc` |
 
 ---
 
