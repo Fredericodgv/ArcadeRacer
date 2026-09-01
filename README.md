@@ -2,7 +2,7 @@
 
 > Um jogo de corrida arcade 3D de alta velocidade, visual low-poly com texturas pixelizadas e cores vibrantes, focado em manobras acrobáticas, pistas insanas e recordes mundiais.
 
----
+----
 
 ## 🎮 Sobre o Jogo
 
@@ -19,7 +19,7 @@
   - ❤️ **Coração:** Regenera a integridade/vida do veículo.
 - 🎨 **Customização & Garagem:** Desbloqueie novos veículos com diferentes atributos (Velocidade, Aceleração, Manobrabilidade), além de peças, escapamentos, spoilers e decalques exclusivos com base no seu desempenho.
 
----
+----
 
 ## 🕹️ Referências & Inspirações
 
@@ -28,7 +28,7 @@
 | **Jogos** | *Crazy Taxi*, *Crash Bandicoot*, *Mario Kart*, *Densha Attack*, *F-Zero*, *Splatoon*, *Trackmania*, *Star Fox* |
 | **Animações / Filmes** | *Redline* (estética extrema de velocidade e adrenalina), *Speed Racer* (pistas sinuosas e manobras neon) |
 
----
+----
 
 ## 🛠️ Arquitetura Técnica
 
@@ -41,7 +41,7 @@
 2. **`Gameplay`:** Contém a pista, física do carro, spawn point, obstáculos e iluminação da fase.
 3. **`UI_Overlay`:** Carregada de forma **aditiva** (`LoadSceneMode.Additive`) sobre a cena de Gameplay para gerenciar HUD, timer, medidor de manobras e menus de pausa sem recarregar o cenário.
 
----
+----
 
 ## 📂 Estrutura do Projeto
 
@@ -65,7 +65,7 @@ ArcadeRacer/
 └── README.md                    # Documentação principal do projeto
 ```
 
----
+----
 
 ## 🚀 Como Executar o Projeto
 
@@ -78,7 +78,7 @@ ArcadeRacer/
    - Abra a cena inicial em `Assets/Scenes/MainMenu.unity`.
    - Pressione **Play** no editor.
 
----
+----
 
 ## 🎮 Esquema de Controles
 
@@ -97,7 +97,7 @@ ArcadeRacer/
 | **Ativar Mega Boost (Barra Roxa)** | Botão de Ombro (`LB` / `L1`) ou Botão `Y` / `△` | `Shift Esquerdo` |
 | **Pausar / Menu** | Botão `Menu` (`Start` / `Options`) | `Esc` |
 
----
+----
 
 ## 📄 Licença
 
