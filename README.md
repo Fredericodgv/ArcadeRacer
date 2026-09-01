@@ -41,22 +41,6 @@
 2. **`Gameplay`:** Contém a pista, física do carro, spawn point, obstáculos e iluminação da fase.
 3. **`UI_Overlay`:** Carregada de forma **aditiva** (`LoadSceneMode.Additive`) sobre a cena de Gameplay para gerenciar HUD, timer, medidor de manobras e menus de pausa sem recarregar o cenário.
 
-### Padrão de Managers Persistentes
-Os managers centrais (`SettingsManager`, `AudioManager`, `SaveSystem`) seguem o padrão Singleton com destruição automática de duplicatas no `Awake`:
-
-```csharp
-private void Awake()
-{
-    if (Instance != null && Instance != this)
-    {
-        Destroy(gameObject);
-        return;
-    }
-    Instance = this;
-    DontDestroyOnLoad(gameObject);
-}
-```
-
 ---
 
 ## 📂 Estrutura do Projeto
